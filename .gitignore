@@ -1,0 +1,23 @@
+.DS_Store
+
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Dependencies and build outputs
+node_modules/
+dist/
+coverage/
+
+# Local override files
+*.local
+
+# Keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
