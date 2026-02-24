@@ -4,16 +4,16 @@ import {
   Archive,
   ArrowUpCircle,
   CalendarDays,
-  Menu,
+  House,
   UserCircle2,
 } from 'lucide-react'
 
 const navItems = [
-  { to: '/home', label: 'Home', icon: Menu },
-  { to: '/schedule', label: '일정', icon: CalendarDays },
+  { to: '/home', label: '투두', icon: House },
+  { to: '/schedule', label: '캘린더', icon: CalendarDays },
   { to: '/compose', label: '등록', icon: ArrowUpCircle, isCenter: true },
   { to: '/archive', label: '보관함', icon: Archive },
-  { to: '/login', label: 'MY', icon: UserCircle2 },
+  { to: '/login', label: '마이', icon: UserCircle2 },
 ]
 
 function NavItemIcon({ Icon, center }: { Icon: LucideIcon; center?: boolean }) {
@@ -23,10 +23,11 @@ function NavItemIcon({ Icon, center }: { Icon: LucideIcon; center?: boolean }) {
 export function MobileLayout() {
   const { pathname } = useLocation()
   const isSplash = pathname === '/splash'
+  const isLogin = pathname === '/login'
 
   return (
     <div className="mobile-shell">
-      <main className={isSplash ? 'mobile-main splash-main' : 'mobile-main'}>
+      <main className={`mobile-main${isSplash ? ' splash-main' : ''}${isLogin ? ' login-main' : ''}`}>
         <Outlet />
       </main>
       {isSplash ? null : (

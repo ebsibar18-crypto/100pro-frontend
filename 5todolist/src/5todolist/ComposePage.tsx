@@ -31,9 +31,13 @@ export function ComposePage() {
   })
 
   const onSubmit = (values: ComposeValues) => {
-    const result = addTodo(values.title, values.memo ?? '')
-    if (!result.ok) return setSubmitError(result.reason ?? '등록 실패')
-    navigate('/home', { replace: true })
+    try {
+      const result = addTodo(values.title, values.memo ?? '')
+      if (!result.ok) return setSubmitError(result.reason ?? '등록 실패')
+      navigate('/home', { replace: true })
+    } catch {
+      setSubmitError('등록 중 오류가 발생했어요. 다시 시도해주세요.')
+    }
   }
 
   return (
