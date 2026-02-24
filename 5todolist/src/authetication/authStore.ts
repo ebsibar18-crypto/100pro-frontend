@@ -18,6 +18,7 @@ type AuthState = {
   login: (email: string, password: string) => Promise<{ ok: boolean; reason?: string }>
   loginWithToken: (token: string, user: User, provider: 'email' | 'kakao') => void
   signup: (userData: { name: string; email: string; password: string }) => Promise<{ ok: boolean; reason?: string }>
+  linkAccount: (tempToken: string, password: string) => Promise<{ ok: boolean; reason?: string }>
   logout: () => void
   deleteAccount: () => void
 }
@@ -70,6 +71,25 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      linkAccount: async (tempToken, password) => {
+        try {
+          const res = await fetch(`${API_BASE}/auth/link-account`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ temp_token: tempToken, password }),
+          })
+          if (!res.ok) {
+            const data = await res.json()
+            return { ok: false, reason: data.detail ?? '비밀번호 검증에 실패했습니다.' }
+          }
+          const data = await res.json()
+          set({ isAuthenticated: true, provider: 'kakao', user: data.user, token: data.access_token })
+          return { ok: true }
+        } catch {
+          return { ok: false, reason: '서버에 연결할 수 없습니다.' }
+        }
+      },
+
       logout: () => {
         set({ isAuthenticated: false, provider: null, user: null, token: null })
       },
@@ -83,7 +103,7 @@ export const useAuthStore = create<AuthState>()(
           fetch(`${API_BASE}/auth/withdraw`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
-          }).catch(() => {})
+          }).catch(() => { })
         }
       },
     }),

@@ -45,6 +45,13 @@ export function KakaoCallbackPage() {
       .then(async (res) => {
         if (!res.ok) {
           const body = await res.json().catch(() => ({}))
+          if (res.status === 409 && body.detail?.code === 'ACCOUNT_COLLISION_REQUIRE_PASSWORD') {
+            return Promise.reject({
+              isCollision: true,
+              data: body.detail.data,
+              message: body.detail.message,
+            })
+          }
           throw new Error(`백엔드 ${res.status}: ${body.detail ?? 'unknown'}`)
         }
         return res.json()
@@ -54,9 +61,23 @@ export function KakaoCallbackPage() {
         loginWithToken(data.access_token, data.user, 'kakao')
         navigate(redirectTo, { replace: true })
       })
-      .catch((err: Error) => {
-        console.error('[Kakao] 백엔드 호출 실패:', err.message)
-        setFailReason(err.message)
+      .catch((err: any) => {
+        if (err.isCollision) {
+          console.warn('[Kakao] 계정 충돌 발생 -> 비밀번호 재검증 화면으로 이동')
+          navigate('/login', {
+            replace: true,
+            state: {
+              collision: true,
+              email: err.data.email,
+              tempToken: err.data.temp_token,
+              message: err.message,
+              redirectTo,
+            },
+          })
+          return
+        }
+        console.error('[Kakao] 백엔드 호출 실패:', err.message || err)
+        setFailReason(err.message || '로그인 중 에러가 발생했습니다.')
         setFailed(true)
       })
   }, [code, error, loginWithToken, navigate, state])

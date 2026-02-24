@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 import { useAuthStore } from './authStore'
 import { authorizeWithKakao } from './kakaoAuth'
@@ -15,12 +15,25 @@ type LoginFormValues = z.infer<typeof schema>
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const collisionState = location.state as {
+    collision: boolean
+    email: string
+    tempToken: string
+    message: string
+    redirectTo: string
+  } | null
+
   const [searchParams] = useSearchParams()
   const login = useAuthStore((state) => state.login)
-  const redirectTo = searchParams.get('redirect') ?? '/home'
+  const linkAccount = useAuthStore((state) => state.linkAccount)
+  const redirectTo = collisionState?.redirectTo ?? searchParams.get('redirect') ?? '/home'
   const [kakaoError, setKakaoError] = useState('')
   const [loginError, setLoginError] = useState('')
   const kakaoReady = Boolean(import.meta.env.VITE_KAKAO_JS_KEY)
+
+  const [linkPassword, setLinkPassword] = useState('')
+  const [linkError, setLinkError] = useState('')
 
   const {
     register,
@@ -52,6 +65,61 @@ export function LoginPage() {
     } catch (error) {
       setKakaoError(error instanceof Error ? error.message : '카카오 로그인 준비 실패')
     }
+  }
+
+  const onLinkAccount = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!collisionState) return
+    if (!linkPassword) {
+      setLinkError('비밀번호를 입력해주세요.')
+      return
+    }
+
+    setLinkError('')
+    const result = await linkAccount(collisionState.tempToken, linkPassword)
+    if (result.ok) {
+      // Clear state and navigate
+      navigate(redirectTo, { replace: true, state: null })
+    } else {
+      setLinkError(result.reason || '비밀번호 확인에 실패했습니다.')
+    }
+  }
+
+  if (collisionState) {
+    return (
+      <section className="screen login-screen">
+        <header className="screen-header login-hero">
+          <h1>기존 계정 발견!</h1>
+          <p>{collisionState.message}</p>
+          <p style={{ marginTop: 8, fontSize: '14px', color: '#ff5c5c' }}>연동할 이메일: <strong>{collisionState.email}</strong></p>
+        </header>
+        <div className="login-panel">
+          <form className="login-form" onSubmit={onLinkAccount}>
+            <label>
+              비밀번호
+              <input
+                type="password"
+                value={linkPassword}
+                onChange={(e) => setLinkPassword(e.target.value)}
+                autoFocus
+              />
+              {linkError ? <span className="error-text">{linkError}</span> : null}
+            </label>
+            <button type="submit" className="login-submit" style={{ marginTop: '16px' }}>
+              안전하게 계정 연동하기
+            </button>
+            <button
+              type="button"
+              className="link-button"
+              style={{ marginTop: '24px', display: 'block', width: '100%', textAlign: 'center' }}
+              onClick={() => navigate('/login', { replace: true, state: null })}
+            >
+              취소하고 돌아가기
+            </button>
+          </form>
+        </div>
+      </section>
+    )
   }
 
   return (
