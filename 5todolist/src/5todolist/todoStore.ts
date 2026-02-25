@@ -119,10 +119,17 @@ export const useTodoStore = create<TodoState>()(
                 due_date: normalizedCreatedAt,
               }),
             })
-            if (!res.ok) throw new Error('API add failed')
+            if (!res.ok) {
+              const errBody = await res.json().catch(() => ({}))
+              throw new Error((errBody as { detail?: string }).detail ?? 'API add failed')
+            }
             const data = await res.json()
             newTodo.id = String(data.id)
-            newTodo.createdAt = `${data.due_date}Z`
+            newTodo.createdAt = typeof data.due_date === 'string' ? data.due_date : `${data.due_date}Z`
+            console.log('Task created (saved to DB):', data)
+            set((state) => ({ todos: [newTodo, ...state.todos] }))
+            await get().fetchTodos()
+            return { ok: true }
           } catch (e) {
             console.error('Failed to add task to remote', e)
             return { ok: false, reason: '서버 통신 에러' }
