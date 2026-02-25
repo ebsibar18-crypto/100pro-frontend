@@ -66,6 +66,12 @@ const dateFromToday = (dayOffset: number, hour = 9, minute = 30) => {
   return target.toISOString()
 }
 
+/** 목업용: 특정 연·월·일 로컬 날짜의 ISO 문자열 (캘린더 스티커 0~5단계 목업) */
+const fixedDate = (year: number, month: number, day: number, hour = 9, minute = 30) => {
+  const d = new Date(year, month - 1, day, hour, minute, 0, 0)
+  return d.toISOString()
+}
+
 const mergeSeedById = <T extends { id: string }>(items: T[], seeds: T[]) => {
   const existingIds = new Set(items.map((item) => item.id))
   const missingSeeds = seeds.filter((seed) => !existingIds.has(seed.id))
@@ -73,6 +79,23 @@ const mergeSeedById = <T extends { id: string }>(items: T[], seeds: T[]) => {
 }
 
 const seedTodos: TodoItem[] = [
+  // 목업: 2/16~2/21 캘린더 스티커 0~5단계 표시용 (차례대로 done0 ~ done5)
+  { id: 'd0216-1', title: '2/16 할 일 1', memo: '스티커 0단계', isDone: false, archived: false, createdAt: fixedDate(2026, 2, 16, 9, 0), userEmail: 'test@test.com' },
+  { id: 'd0217-1', title: '2/17 할 일 1', memo: '스티커 1단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 17, 9, 0), userEmail: 'test@test.com' },
+  { id: 'd0218-1', title: '2/18 할 일 1', memo: '스티커 2단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 18, 9, 0), userEmail: 'test@test.com' },
+  { id: 'd0218-2', title: '2/18 할 일 2', memo: '스티커 2단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 18, 10, 0), userEmail: 'test@test.com' },
+  { id: 'd0219-1', title: '2/19 할 일 1', memo: '스티커 3단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 19, 9, 0), userEmail: 'test@test.com' },
+  { id: 'd0219-2', title: '2/19 할 일 2', memo: '스티커 3단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 19, 10, 0), userEmail: 'test@test.com' },
+  { id: 'd0219-3', title: '2/19 할 일 3', memo: '스티커 3단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 19, 11, 0), userEmail: 'test@test.com' },
+  { id: 'd0220-1', title: '2/20 할 일 1', memo: '스티커 4단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 20, 9, 0), userEmail: 'test@test.com' },
+  { id: 'd0220-2', title: '2/20 할 일 2', memo: '스티커 4단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 20, 10, 0), userEmail: 'test@test.com' },
+  { id: 'd0220-3', title: '2/20 할 일 3', memo: '스티커 4단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 20, 11, 0), userEmail: 'test@test.com' },
+  { id: 'd0220-4', title: '2/20 할 일 4', memo: '스티커 4단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 20, 12, 0), userEmail: 'test@test.com' },
+  { id: 'd0221-1', title: '2/21 할 일 1', memo: '스티커 5단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 21, 9, 0), userEmail: 'test@test.com' },
+  { id: 'd0221-2', title: '2/21 할 일 2', memo: '스티커 5단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 21, 10, 0), userEmail: 'test@test.com' },
+  { id: 'd0221-3', title: '2/21 할 일 3', memo: '스티커 5단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 21, 11, 0), userEmail: 'test@test.com' },
+  { id: 'd0221-4', title: '2/21 할 일 4', memo: '스티커 5단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 21, 12, 0), userEmail: 'test@test.com' },
+  { id: 'd0221-5', title: '2/21 할 일 5', memo: '스티커 5단계', isDone: true, archived: false, createdAt: fixedDate(2026, 2, 21, 13, 0), userEmail: 'test@test.com' },
   {
     id: 'today-1',
     title: '고객 미팅 준비',
